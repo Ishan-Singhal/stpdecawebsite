@@ -153,14 +153,14 @@ const Resources = () => {
         )}
 
         {/* Resource Categories */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+        <div className="flex flex-col lg:flex-row justify-center items-center gap-12 mb-16">
           {resourceCategories.map((category, index) => (
-            <Card key={index} className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-0 bg-gradient-to-br from-background to-muted/30">
-              <CardHeader className="pb-6">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg">
+            <Card key={index} className="group flex-1 max-w-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-0 bg-gradient-to-br from-background to-muted/30">
+              <CardHeader className="pb-6 flex flex-col items-start">
+                <div className="w-14 h-14 rounded-xl bg-white shadow-lg flex items-center justify-center mb-6">
                   {category.icon}
                 </div>
-                <CardTitle className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                <CardTitle className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300 text-left">
                   {category.title}
                 </CardTitle>
               </CardHeader>
