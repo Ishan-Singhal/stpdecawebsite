@@ -142,11 +142,14 @@ const Resources = () => {
   const resourceCategories = resources?.categories;
   const quickLinks = defaultQuickLinks;
 
-  const enhancedCategories = resourceCategories.map((category: any, index: number) => ({
-    ...category,
-    icon: getCategoryIcon(category.title, index),
-    gradient: getCategoryGradient(category.title, index)
-  }));
+  // Only map if resourceCategories is an array
+  const enhancedCategories = Array.isArray(resourceCategories)
+    ? resourceCategories.map((category: any, index: number) => ({
+        ...category,
+        icon: getCategoryIcon(category.title, index),
+        gradient: getCategoryGradient(category.title, index)
+      }))
+    : [];
 
 
   const getIcon = (type: string) => {
@@ -185,38 +188,42 @@ const Resources = () => {
 
         {/* Resource Categories */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-          {resourceCategories.map((category: any, index: number) => (
-            <Card key={index} className="group hover:shadow-xl transition-all duration-300">
-              <CardHeader className="pb-4">
-                <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-primary-foreground mb-4 group-hover:scale-110 transition-transform duration-300">
-                  {category.icon}
-                </div>
-                <CardTitle className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
-                  {category.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {category.resources.map((resource: any, resourceIndex: number) => (
-                    <div key={resourceIndex} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200">
-                      <div className="flex items-center space-x-3 flex-1">
-                        {getIcon(resource.type)}
-                        <div className="flex-1">
-                          <div className="text-sm font-medium">{resource.name}</div>
-                          {resource.description && (
-                            <div className="text-xs text-muted-foreground">{resource.description}</div>
-                          )}
+          {enhancedCategories.length > 0 ? (
+            enhancedCategories.map((category: any, index: number) => (
+              <Card key={index} className="group hover:shadow-xl transition-all duration-300">
+                <CardHeader className="pb-4">
+                  <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-primary-foreground mb-4 group-hover:scale-110 transition-transform duration-300">
+                    {category.icon}
+                  </div>
+                  <CardTitle className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                    {category.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {Array.isArray(category.resources) && category.resources.length > 0 ? (
+                      category.resources.map((resource: any, resourceIndex: number) => (
+                        <div key={resourceIndex} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200">
+                          <div className="flex items-center space-x-3 flex-1">
+                            {getIcon(resource.type)}
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">{resource.name}</div>
+                              {resource.description && (
+                                <div className="text-xs text-muted-foreground">{resource.description}</div>
+                              )}
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm" disabled={resource.url === '#'}>
+                            <Download className="w-4 h-4" />
+                          </Button>
                         </div>
-                      </div>
-                      <Button variant="ghost" size="sm" disabled={resource.url === '#'}>
-                        <Download className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                      ))
+                    ) : null}
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : null}
         </div>
 
         {/* Quick Links */}
