@@ -2,8 +2,15 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Play, ExternalLink, RefreshCw, Eye, FileIcon, GraduationCap, Target } from "lucide-react";
+import { FileText, Play, ExternalLink, RefreshCw, Eye, FileIcon, Target } from "lucide-react";
 import DECAConfig from "@/lib/DECAConfig";
+
+const QUICK_LINKS = [
+  { name: "Official DECA Website", url: "https://www.deca.org", description: "National DECA organization resources" },
+  { name: "Texas DECA", url: "https://www.texasdeca.org/", description: "State-level information and competitions" },
+  { name: "List of Competitions", url: "https://www.deca.org/compete#competitive-events", description: "Browse all DECA competitive events and categories" },
+  { name: "Corporate Challenges", url: "https://www.deca.org/challenges", description: "Real-world business challenges from industry partners" }
+];
 
 const Resources = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -101,8 +108,23 @@ const Resources = () => {
     }
   };
 
-  const resourceCategories = resources?.categories || [];
-  const quickLinks = resources?.quickLinks || [];
+  // Group resources by type
+  const allResources = resources?.categories?.flatMap(cat => cat.resources) || [];
+  const prepMaterials = allResources.filter(r => r.type !== "Video");
+  const videos = allResources.filter(r => r.type === "Video");
+
+  const resourceCategories = [
+    {
+      title: "Competition Prep Materials",
+      icon: <Target className="w-7 h-7" />,
+      resources: prepMaterials
+    },
+    {
+      title: "Training Videos",
+      icon: <Play className="w-7 h-7" />,
+      resources: videos
+    }
+  ];
 
   return (
     <section id="resources" className="py-20 bg-muted/30">
@@ -135,6 +157,9 @@ const Resources = () => {
           {resourceCategories.map((category, index) => (
             <Card key={index} className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-0 bg-gradient-to-br from-background to-muted/30">
               <CardHeader className="pb-6">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg">
+                  {category.icon}
+                </div>
                 <CardTitle className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
                   {category.title}
                 </CardTitle>
@@ -177,7 +202,7 @@ const Resources = () => {
         <div className="bg-background/80 backdrop-blur-sm rounded-xl p-8 border">
           <h3 className="text-2xl font-bold mb-6 text-center">Quick Links</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {quickLinks.map((link, index) => (
+            {QUICK_LINKS.map((link, index) => (
               <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors duration-200">
                 <div>
                   <h4 className="font-semibold text-foreground">{link.name}</h4>
