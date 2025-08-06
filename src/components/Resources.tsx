@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Video, Download, ExternalLink, BookOpen, Award, RefreshCw } from "lucide-react";
+import { FileText, Video, Download, ExternalLink, BookOpen, Award, RefreshCw, Eye, FileIcon, Play, GraduationCap, Target, Users, TrendingUp } from "lucide-react";
 import DECAConfig from "@/lib/DECAConfig";
 
 const Resources = () => {
@@ -44,39 +44,6 @@ const Resources = () => {
     };
   }, []);
 
-  // Sample/fallback data structure
-  const defaultResourceCategories = [
-    {
-      title: "Competition Prep Materials",
-      icon: <Award className="w-6 h-6" />,
-      resources: [
-        { name: "Business Plan Templates", type: "PDF", url: "#", description: "Complete templates for business plan competitions" },
-        { name: "Marketing Case Study Examples", type: "PDF", url: "#", description: "Real-world case studies for practice" },
-        { name: "Presentation Guidelines", type: "PDF", url: "#", description: "Professional presentation standards" },
-        { name: "Roleplay Scenarios Practice", type: "PDF", url: "#", description: "Practice scenarios for competitions" }
-      ]
-    },
-    {
-      title: "Study Guides & Materials",
-      icon: <BookOpen className="w-6 h-6" />,
-      resources: [
-        { name: "Business Fundamentals Guide", type: "PDF", url: "#", description: "Essential business concepts" },
-        { name: "Marketing Principles Handbook", type: "PDF", url: "#", description: "Core marketing strategies and concepts" },
-        { name: "Entrepreneurship Basics", type: "PDF", url: "#", description: "Starting and running a business" },
-        { name: "Finance & Accounting Primer", type: "PDF", url: "#", description: "Financial management essentials" }
-      ]
-    },
-    {
-      title: "Training Videos",
-      icon: <Video className="w-6 h-6" />,
-      resources: [
-        { name: "Competition Strategy Workshop", type: "Video", url: "#", description: "Winning strategies for DECA competitions" },
-        { name: "Public Speaking for Business", type: "Video", url: "#", description: "Professional presentation skills" },
-        { name: "Team Building & Leadership", type: "Video", url: "#", description: "Developing leadership abilities" },
-        { name: "Networking Best Practices", type: "Video", url: "#", description: "Building professional relationships" }
-      ]
-    }
-  ];
 
   const defaultQuickLinks = [
     { name: "Official DECA Website", url: "https://www.deca.org", description: "National DECA organization resources" },
@@ -112,9 +79,75 @@ const Resources = () => {
     }
   };
 
-  // Use dynamic resources if available, otherwise use defaults
-  const resourceCategories = resources?.categories || defaultResourceCategories;
-  const quickLinks = resources?.quickLinks || defaultQuickLinks;
+  const getCategoryIcon = (title: string, index: number) => {
+    const iconMap: { [key: string]: JSX.Element } = {
+      'Competition Prep Materials': <Target className="w-7 h-7" />,
+      'Study Guides & Materials': <GraduationCap className="w-7 h-7" />,
+      'Training Videos': <Play className="w-7 h-7" />,
+      'Competition': <Target className="w-7 h-7" />,
+      'Study': <GraduationCap className="w-7 h-7" />,
+      'Video': <Play className="w-7 h-7" />,
+      'Training': <Play className="w-7 h-7" />,
+      'Materials': <GraduationCap className="w-7 h-7" />
+    };
+
+    // Try exact match first
+    if (iconMap[title]) return iconMap[title];
+    
+    // Try partial matches
+    for (const [key, icon] of Object.entries(iconMap)) {
+      if (title.toLowerCase().includes(key.toLowerCase())) return icon;
+    }
+    
+    // Fallback based on index
+    const defaultIcons = [
+      <Target className="w-7 h-7" />,
+      <GraduationCap className="w-7 h-7" />, 
+      <Play className="w-7 h-7" />
+    ];
+    return defaultIcons[index % defaultIcons.length];
+  };
+
+  // Gradient mapping for categories
+  const getCategoryGradient = (title: string, index: number) => {
+    const gradientMap: { [key: string]: string } = {
+      'Competition Prep Materials': 'from-amber-500 to-orange-600',
+      'Study Guides & Materials': 'from-blue-500 to-indigo-600',
+      'Training Videos': 'from-purple-500 to-pink-600',
+      'Competition': 'from-amber-500 to-orange-600',
+      'Study': 'from-blue-500 to-indigo-600',
+      'Video': 'from-purple-500 to-pink-600',
+      'Training': 'from-purple-500 to-pink-600',
+      'Materials': 'from-blue-500 to-indigo-600'
+    };
+
+    // Try exact match first
+    if (gradientMap[title]) return gradientMap[title];
+    
+    // Try partial matches
+    for (const [key, gradient] of Object.entries(gradientMap)) {
+      if (title.toLowerCase().includes(key.toLowerCase())) return gradient;
+    }
+    
+    // Fallback based on index
+    const defaultGradients = [
+      'from-amber-500 to-orange-600',
+      'from-blue-500 to-indigo-600',
+      'from-purple-500 to-pink-600'
+    ];
+    return defaultGradients[index % defaultGradients.length];
+  };
+
+
+  const resourceCategories = resources?.categories;
+  const quickLinks = defaultQuickLinks;
+
+  const enhancedCategories = resourceCategories.map((category: any, index: number) => ({
+    ...category,
+    icon: getCategoryIcon(category.title, index),
+    gradient: getCategoryGradient(category.title, index)
+  }));
+
 
   const getIcon = (type: string) => {
     switch (type) {
