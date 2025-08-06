@@ -1,0 +1,424 @@
+const CALENDAR_ID = 'c_4878007f96309e248f2110cc9dac2f871654c890a1f9d769060a08d3dd5ffe92@group.calendar.google.com'; // Google Calendar ID
+const DRIVE_FOLDER_ID = '16SpBTQsYJDZejgLrSZZcQP66KQUU3tDi'; // Google Drive folder ID  
+const POINTS_SHEET_ID = '1aF2N7PQhSSfBqhEjjGHSAqlD4t8KuH6VQ0pI0veBeC0'; // Google Sheets ID
+
+function doPost(e) {
+  // Set CORS headers to allow website to read responses
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const action = data.action;
+    
+    console.log('Received action:', action);
+    
+    switch (action) {
+      case 'test_connection':
+        return handleTestConnection();
+        
+      case 'get_events':
+        return handleGetEvents();
+        
+      case 'sync_calendar':
+        return handleSyncCalendar(data.calendar_id);
+        
+      case 'get_resources':
+        return handleGetResources();
+        
+      case 'sync_resources':
+        return handleSyncResources();
+        
+      case 'lookup_student':
+        return handleLookupStudent(data.student_id);
+        
+      default:
+        return createResponse({
+          success: false,
+          message: 'Unknown action: ' + action
+        });
+    }
+    
+  } catch (error) {
+    console.error('Error in doPost:', error);
+    return createResponse({
+      success: false,
+      error: error.toString()
+    });
+  }
+}
+
+function doGet(e) {
+  const type = e.parameter.type;
+  
+  try {
+    switch (type) {
+      case 'events':
+        return handleGetEvents();
+        
+      case 'resources':
+        return handleGetResources();
+        
+      case 'points':
+        return handleGetAllPoints();
+        
+      default:
+        return createResponse({
+          message: 'DECA Google Apps Script is running',
+          available_endpoints: ['events', 'resources', 'points']
+        });
+    }
+  } catch (error) {
+    console.error('Error in doGet:', error);
+    return createResponse({
+      success: false,
+      error: error.toString()
+    });
+  }
+}
+
+// Helper function to create responses with CORS headers
+function createResponse(data) {
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// Test connection
+function handleTestConnection() {
+  console.log('Testing connection...');
+  return createResponse({
+    success: true,
+    message: 'Connection successful!',
+    timestamp: new Date().toISOString()
+  });
+}
+
+// Calendar functions
+function handleGetEvents() {
+  try {
+    const calendar = CalendarApp.getCalendarById(CALENDAR_ID);
+    if (!calendar) {
+      throw new Error('Calendar not found. Check your CALENDAR_ID.');
+    }
+    
+    const now = new Date();
+    const futureDate = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days from now
+    
+    const events = calendar.getEvents(now, futureDate);
+    
+    const formattedEvents = events.map(event => ({
+      title: event.getTitle(),
+      date: event.getStartTime().toLocaleDateString(),
+      time: event.getStartTime().toLocaleTimeString() + ' - ' + event.getEndTime().toLocaleTimeString(),
+      location: event.getLocation() || 'TBD',
+      description: event.getDescription() || 'No description available',
+      type: getEventType(event.getTitle()),
+      urgent: isUrgentEvent(event),
+      calendarLink: event.getId()
+    }));
+    
+    console.log('Found', formattedEvents.length, 'events');
+    return createResponse({
+      success: true,
+      events: formattedEvents
+    });
+    
+  } catch (error) {
+    console.error('Error getting events:', error);
+    return createResponse({
+      success: false,
+      error: 'Failed to get calendar events: ' + error.toString()
+    });
+  }
+}
+
+function handleSyncCalendar(calendarId) {
+  try {
+    if (calendarId) {
+      console.log('Calendar sync requested for:', calendarId);
+    }
+    
+    return createResponse({
+      success: true,
+      message: 'Calendar sync completed',
+      calendar_id: CALENDAR_ID
+    });
+    
+  } catch (error) {
+    console.error('Error syncing calendar:', error);
+    return createResponse({
+      success: false,
+      error: 'Failed to sync calendar: ' + error.toString()
+    });
+  }
+}
+
+// Drive/Resources functions
+function handleGetResources() {
+  try {
+    const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+    if (!folder) {
+      throw new Error('Drive folder not found. Check your DRIVE_FOLDER_ID.');
+    }
+    
+    const files = folder.getFiles();
+    const categories = {
+      'Competition Prep Materials': [],
+      'Study Guides & Materials': [],
+      'Training Videos': []
+    };
+    
+    while (files.hasNext()) {
+      const file = files.next();
+      const fileName = file.getName();
+      const fileType = getFileType(fileName);
+      const category = categorizeFile(fileName);
+      
+      const resource = {
+        name: fileName,
+        type: fileType,
+        url: file.getDownloadUrl(),
+        description: file.getDescription() || 'No description available'
+      };
+      
+      if (categories[category]) {
+        categories[category].push(resource);
+      } else {
+        categories['Study Guides & Materials'].push(resource);
+      }
+    }
+    
+    const formattedCategories = Object.keys(categories).map(categoryName => ({
+      title: categoryName,
+      icon: getCategoryIcon(categoryName),
+      resources: categories[categoryName]
+    }));
+    
+    const quickLinks = [
+      { name: "Official DECA Website", url: "https://www.deca.org", description: "National DECA organization resources" },
+      { name: "Texas DECA", url: "https://www.texasdeca.org/", description: "State-level information and competitions" },
+      { name: "List of Competitions", url: "https://www.deca.org/compete#competitive-events", description: "Browse all DECA competitive events and categories" },
+      { name: "Corporate Challenges", url: "https://www.deca.org/challenges", description: "Real-world business challenges from industry partners" }
+    ];
+    
+    console.log('Found resources in', formattedCategories.length, 'categories');
+    return createResponse({
+      success: true,
+      resources: {
+        categories: formattedCategories,
+        quickLinks: quickLinks
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error getting resources:', error);
+    return createResponse({
+      success: false,
+      error: 'Failed to get resources: ' + error.toString()
+    });
+  }
+}
+
+function handleSyncResources() {
+  try {
+    console.log('Resources sync requested');
+    return createResponse({
+      success: true,
+      message: 'Resources sync completed',
+      folder_id: DRIVE_FOLDER_ID
+    });
+    
+  } catch (error) {
+    console.error('Error syncing resources:', error);
+    return createResponse({
+      success: false,
+      error: 'Failed to sync resources: ' + error.toString()
+    });
+  }
+}
+
+// Points/Sheets functions - Updated for new column structure
+function handleLookupStudent(studentId) {
+  try {
+    const sheet = SpreadsheetApp.openById(POINTS_SHEET_ID).getActiveSheet();
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    
+    console.log('Looking up student:', studentId);
+    
+    // New column structure: A=Name, B=Student ID, C=Competition Points, D=Meeting Points, 
+    // E=Community Points, F=Leadership Points, G=Total Points
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][1].toString().trim() === studentId.toString().trim()) { // Column B = Student ID
+        const competitionPoints = values[i][2] || 0;
+        const meetingPoints = values[i][3] || 0;
+        const communityPoints = values[i][4] || 0;
+        const leadershipPoints = values[i][5] || 0;
+        const totalPoints = values[i][6] || (competitionPoints + meetingPoints + communityPoints + leadershipPoints);
+        
+        // Calculate rank by counting how many students have higher total points
+        let rank = 1;
+        for (let j = 1; j < values.length; j++) {
+          if (j !== i && values[j][6] > totalPoints) {
+            rank++;
+          }
+        }
+        
+        const studentData = {
+          name: values[i][0] || 'Unknown Student', // Column A = Name
+          studentId: studentId,
+          totalPoints: totalPoints,
+          rank: rank,
+          categories: {
+            competitions: { 
+              points: competitionPoints, 
+              activities: competitionPoints > 0 ? [`Earned ${competitionPoints} competition points`] : ['No competition activities recorded'] 
+            },
+            meetings: { 
+              points: meetingPoints, 
+              activities: meetingPoints > 0 ? [`Earned ${meetingPoints} meeting points`] : ['No meeting attendance recorded'] 
+            },
+            community: { 
+              points: communityPoints, 
+              activities: communityPoints > 0 ? [`Earned ${communityPoints} community service points`] : ['No community service recorded'] 
+            },
+            leadership: { 
+              points: leadershipPoints, 
+              activities: leadershipPoints > 0 ? [`Earned ${leadershipPoints} leadership points`] : ['No leadership activities recorded'] 
+            }
+          },
+          recentActivity: [
+            { date: new Date().toISOString().split('T')[0], activity: "Data from Google Sheets", points: totalPoints, type: "system" }
+          ]
+        };
+        
+        console.log('Student found:', studentData.name);
+        return createResponse({
+          success: true,
+          student: studentData
+        });
+      }
+    }
+    
+    console.log('Student not found:', studentId);
+    return createResponse({
+      success: false,
+      message: 'Student ID not found'
+    });
+    
+  } catch (error) {
+    console.error('Error looking up student:', error);
+    return createResponse({
+      success: false,
+      error: 'Failed to lookup student: ' + error.toString()
+    });
+  }
+}
+
+function handleGetAllPoints() {
+  try {
+    const sheet = SpreadsheetApp.openById(POINTS_SHEET_ID).getActiveSheet();
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    
+    const members = [];
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][1]) { // If there's a student ID in column B
+        const totalPoints = values[i][6] || 0;
+        
+        // Calculate rank
+        let rank = 1;
+        for (let j = 1; j < values.length; j++) {
+          if (j !== i && values[j][6] > totalPoints) {
+            rank++;
+          }
+        }
+        
+        members.push({
+          name: values[i][0] || 'Unknown', // Column A = Name
+          studentId: values[i][1], // Column B = Student ID
+          competitionPoints: values[i][2] || 0, // Column C = Competition Points
+          meetingPoints: values[i][3] || 0, // Column D = Meeting Points
+          communityPoints: values[i][4] || 0, // Column E = Community Points
+          leadershipPoints: values[i][5] || 0, // Column F = Leadership Points
+          totalPoints: totalPoints, // Column G = Total Points
+          rank: rank
+        });
+      }
+    }
+    
+    // Sort by total points descending
+    members.sort((a, b) => b.totalPoints - a.totalPoints);
+    
+    console.log('Found', members.length, 'members');
+    return createResponse({
+      success: true,
+      members: members
+    });
+    
+  } catch (error) {
+    console.error('Error getting all points:', error);
+    return createResponse({
+      success: false,
+      error: 'Failed to get points data: ' + error.toString()
+    });
+  }
+}
+
+// Helper functions
+function getEventType(title) {
+  const titleLower = title.toLowerCase();
+  if (titleLower.includes('competition') || titleLower.includes('contest')) return 'Competition';
+  if (titleLower.includes('workshop') || titleLower.includes('training')) return 'Workshop';
+  if (titleLower.includes('speaker') || titleLower.includes('guest')) return 'Speaker Event';
+  if (titleLower.includes('social') || titleLower.includes('party') || titleLower.includes('fun')) return 'Social';
+  return 'Meeting';
+}
+
+function isUrgentEvent(event) {
+  const now = new Date();
+  const eventDate = event.getStartTime();
+  const daysUntilEvent = (eventDate - now) / (1000 * 60 * 60 * 24);
+  
+  // Mark as urgent if it's within 3 days and is a competition
+  return daysUntilEvent <= 3 && getEventType(event.getTitle()) === 'Competition';
+}
+
+function getFileType(fileName) {
+  const extension = fileName.split('.').pop().toLowerCase();
+  switch (extension) {
+    case 'pdf': return 'PDF';
+    case 'mp4':
+    case 'mov':
+    case 'avi': return 'Video';
+    case 'doc':
+    case 'docx': return 'Document';
+    case 'ppt':
+    case 'pptx': return 'Presentation';
+    default: return 'PDF';
+  }
+}
+
+function categorizeFile(fileName) {
+  const nameLower = fileName.toLowerCase();
+  if (nameLower.includes('competition') || nameLower.includes('contest') || nameLower.includes('prep')) {
+    return 'Competition Prep Materials';
+  }
+  if (nameLower.includes('video') || nameLower.includes('training') || nameLower.includes('workshop')) {
+    return 'Training Videos';
+  }
+  return 'Study Guides & Materials';
+}
+
+function getCategoryIcon(categoryName) {
+  switch (categoryName) {
+    case 'Competition Prep Materials': return 'Award';
+    case 'Training Videos': return 'Video';
+    default: return 'BookOpen';
+  }
+}

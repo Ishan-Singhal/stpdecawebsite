@@ -87,7 +87,7 @@ const Header = () => {
           <div className="flex items-center space-x-2">
             <div className="w-10 h-10 rounded-lg overflow-hidden bg-primary/10 flex items-center justify-center">
               <img 
-                src="/lovable-uploads/1efb8c0b-2ad5-47a3-8660-72040f48b4e4.png" 
+                src="/stpdeca.png" 
                 alt="Stony Point High School Logo" 
                 className="w-full h-full object-contain"
               />
