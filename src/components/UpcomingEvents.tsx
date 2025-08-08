@@ -338,7 +338,7 @@ const UpcomingEvents = () => {
           <Button 
             variant="secondary" 
             size="lg"
-            onClick={() => window.open('https://calendar.google.com', '_blank')}
+            onClick={() => window.open('https://calendar.google.com/calendar/u/0/embed?src=c_53aee3e49de1e268dd7365870ed3cd228534cf2bf84b0490f5d1a4fa48603ca9@group.calendar.google.com&ctz=America/Chicago', '_blank')}
           >
             View Full Calendar
           </Button>
