@@ -66,7 +66,7 @@ const UpcomingEvents = () => {
 
     const loadEventsFromGoogle = async () => {
       // Get URL from centralized config
-      const GOOGLE_APPS_SCRIPT_URL = DECAConfig.getGoogleAppsScriptUrl();
+      const GOOGLE_APPS_SCRIPT_URL = await DECAConfig.getGoogleAppsScriptUrl();
       
       try {
         console.log("🔍 Fetching events from:", GOOGLE_APPS_SCRIPT_URL);
@@ -157,7 +157,7 @@ const UpcomingEvents = () => {
   const upcomingEvents = events || defaultEvents;
 
   const handleRefreshEvents = async () => {
-    const GOOGLE_APPS_SCRIPT_URL = DECAConfig.getGoogleAppsScriptUrl();
+    const GOOGLE_APPS_SCRIPT_URL = await DECAConfig.getGoogleAppsScriptUrl();
     
     setIsLoading(true);
     try {

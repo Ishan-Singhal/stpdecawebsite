@@ -25,7 +25,7 @@ const PointsTracker = () => {
 
     const loadMemberDataFromGoogle = async () => {
       // Get URL from centralized config
-      const GOOGLE_APPS_SCRIPT_URL = DECAConfig.getGoogleAppsScriptUrl();
+      const GOOGLE_APPS_SCRIPT_URL = await DECAConfig.getGoogleAppsScriptUrl();
       
       try {
         const response = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?type=points`);
@@ -81,7 +81,7 @@ const PointsTracker = () => {
     }
 
     // Get URL from centralized config
-    const GOOGLE_APPS_SCRIPT_URL = DECAConfig.getGoogleAppsScriptUrl();
+    const GOOGLE_APPS_SCRIPT_URL = await DECAConfig.getGoogleAppsScriptUrl();
     
     setIsLoading(true);
 

@@ -39,7 +39,7 @@ const Resources = () => {
     };
 
     const loadResourcesFromGoogle = async () => {
-      const GOOGLE_APPS_SCRIPT_URL = DECAConfig.getGoogleAppsScriptUrl();
+      const GOOGLE_APPS_SCRIPT_URL = await DECAConfig.getGoogleAppsScriptUrl();
       try {
         const response = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?type=resources`);
         const data = await response.json();
@@ -60,7 +60,7 @@ const Resources = () => {
   }, []);
 
   const handleRefreshResources = async () => {
-    const GOOGLE_APPS_SCRIPT_URL = DECAConfig.getGoogleAppsScriptUrl();
+    const GOOGLE_APPS_SCRIPT_URL = await DECAConfig.getGoogleAppsScriptUrl();
     setIsLoading(true);
     try {
       const response = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?type=resources`);
