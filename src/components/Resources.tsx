@@ -128,6 +128,7 @@ const Resources = () => {
   };
 
   const handleDownload = async (resource: any) => {
+    // This function is now simplified to just open in Google Drive
     if (resource.url === '#') {
       toast({
         title: "Resource Not Available",
@@ -137,67 +138,12 @@ const Resources = () => {
       return;
     }
 
-    try {
-      // For forms and websites, open in new tab instead of downloading
-      if (resource.type === 'Form' || resource.type === 'Website') {
-        window.open(resource.url, '_blank');
-        toast({
-          title: "Opening Resource",
-          description: `Opening ${resource.name} in new tab...`,
-        });
-        return;
-      }
-
-      // Try direct download first if available
-      let downloadUrl = resource.urls?.download || resource.url;
-      
-      if (resource.urls?.download) {
-        try {
-          // Create a hidden iframe to attempt the download
-          const iframe = document.createElement('iframe');
-          iframe.style.display = 'none';
-          iframe.src = downloadUrl;
-          document.body.appendChild(iframe);
-          
-          // Remove iframe after a short delay
-          setTimeout(() => {
-            if (document.body.contains(iframe)) {
-              document.body.removeChild(iframe);
-            }
-          }, 2000);
-          
-          toast({
-            title: "Download Started",
-            description: `Downloading ${resource.name}... If download doesn't start, try "View Online"`,
-          });
-          
-        } catch (error) {
-          console.log('Direct download failed, opening view link');
-          window.open(resource.urls?.view || resource.url, '_blank');
-          toast({
-            title: "Opening File",
-            description: "Download not available. Opening file for manual download...",
-          });
-        }
-      } else {
-        // No direct download available, open view link
-        window.open(resource.url, '_blank');
-        toast({
-          title: "Opening File",
-          description: "Opening file in Google Drive. You can download from there.",
-        });
-      }
-      
-    } catch (error) {
-      console.error('Download error:', error);
-      toast({
-        title: "Opening File",
-        description: "Opening resource in new tab...",
-        variant: "destructive",
-      });
-      // Final fallback to opening the main URL
-      window.open(resource.url, '_blank');
-    }
+    // Open the Google Drive view for all file types
+    window.open(resource.urls?.view || resource.url, '_blank');
+    toast({
+      title: "Opening in Google Drive",
+      description: `Opening ${resource.name} in Google Drive where you can download it.`,
+    });
   };
 
   const handlePreview = async (resource: any) => {
@@ -336,31 +282,17 @@ const Resources = () => {
                           </Button>
                         )}
                         
-                        {/* View Online button */}
+                        {/* Open in Google Drive button */}
                         <Button 
                           variant="ghost" 
                           size="sm" 
                           disabled={resource.url === '#'}
                           onClick={() => window.open(resource.urls?.view || resource.url, '_blank')}
                           className="hover:bg-primary/10 hover:text-primary"
-                          title="View in Google Drive"
+                          title="Open in Google Drive"
                         >
                           <ExternalLink className="w-3 h-3" />
                         </Button>
-                        
-                        {/* Download button (only show if download URL exists) */}
-                        {resource.urls?.download && resource.type !== 'Form' && resource.type !== 'Website' && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            disabled={resource.url === '#'}
-                            onClick={() => handleDownload(resource)}
-                            className="hover:bg-primary/10 hover:text-primary"
-                            title="Try Download"
-                          >
-                            <Download className="w-3 h-3" />
-                          </Button>
-                        )}
                       </div>
                     </div>
                   ))}
