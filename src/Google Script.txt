@@ -1,6 +1,7 @@
-const CALENDAR_ID = 'c_4878007f96309e248f2110cc9dac2f871654c890a1f9d769060a08d3dd5ffe92@group.calendar.google.com'; // Google Calendar ID
-const DRIVE_FOLDER_ID = '16SpBTQsYJDZejgLrSZZcQP66KQUU3tDi'; // Google Drive folder ID  
-const POINTS_SHEET_ID = '1aF2N7PQhSSfBqhEjjGHSAqlD4t8KuH6VQ0pI0veBeC0'; // Google Sheets ID
+// Replace these with your actual IDs
+const CALENDAR_ID = 'c_53aee3e49de1e268dd7365870ed3cd228534cf2bf84b0490f5d1a4fa48603ca9@group.calendar.google.com'; // Your Google Calendar ID
+const DRIVE_FOLDER_ID = '16SpBTQsYJDZejgLrSZZcQP66KQUU3tDi'; // Your Google Drive folder ID  
+const POINTS_SHEET_ID = '1aF2N7PQhSSfBqhEjjGHSAqlD4t8KuH6VQ0pI0veBeC0'; // Your Google Sheets ID
 
 function doPost(e) {
   // Set CORS headers to allow website to read responses
