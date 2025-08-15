@@ -107,49 +107,97 @@ const UpcomingEvents = () => {
     };
   }, []);
 
+  // Fixed date parsing function
+  const parseEventDateTime = (event: any) => {
+    try {
+      // First, try to use ISO format if available (from updated GAS)
+      if (event.startTimeISO) {
+        return new Date(event.startTimeISO);
+      }
+      
+      // Handle different date formats more safely
+      let eventDateTime;
+      
+      if (event.date.includes('-') && event.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        // ISO date format (YYYY-MM-DD)
+        const timeStr = event.time.split(' - ')[0].trim();
+        
+        // Handle "All Day" events
+        if (timeStr.toLowerCase() === 'all day') {
+          eventDateTime = new Date(`${event.date}T09:00:00`);
+        } else {
+          // Parse time more carefully
+          let hour = 0, minute = 0;
+          const timeMatch = timeStr.match(/(\d{1,2}):?(\d{2})?\s*(AM|PM)?/i);
+          
+          if (timeMatch) {
+            hour = parseInt(timeMatch[1]);
+            minute = parseInt(timeMatch[2]) || 0;
+            const isPM = timeMatch[3]?.toLowerCase() === 'pm';
+            
+            if (isPM && hour !== 12) hour += 12;
+            if (!isPM && hour === 12) hour = 0;
+          }
+          
+          eventDateTime = new Date(`${event.date}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`);
+        }
+      } else {
+        // Try parsing as a regular date string
+        const timeStr = event.time.split(' - ')[0].trim();
+        
+        if (timeStr.toLowerCase() === 'all day') {
+          eventDateTime = new Date(`${event.date} 09:00:00`);
+        } else {
+          eventDateTime = new Date(`${event.date} ${timeStr}`);
+        }
+      }
+      
+      // Validate the parsed date
+      if (isNaN(eventDateTime.getTime())) {
+        console.warn(`Invalid date parsed for event: ${event.title}, using fallback`);
+        // Fallback to a future date so event still shows
+        eventDateTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      }
+      
+      return eventDateTime;
+    } catch (error) {
+      console.error(`Error parsing date for event ${event.title}:`, error);
+      // Return tomorrow's date as fallback
+      return new Date(Date.now() + 24 * 60 * 60 * 1000);
+    }
+  };
 
   const filterUpcomingEvents = (eventList: any[]) => {
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const now = toZonedTime(new Date(), userTimezone);
+    const now = new Date();
     
-    console.log("🕐 Current time in timezone:", formatInTimeZone(now, userTimezone, 'yyyy-MM-dd HH:mm:ss zzz'));
+    console.log("🕐 Current time:", now.toISOString());
     
     return eventList
       .filter(event => {
         try {
-          // Parse event date and time
-          let eventDateTime;
-          
-          if (event.date.includes('-')) {
-            // ISO format (YYYY-MM-DD)
-            const timeStr = event.time.split(' - ')[0]; // Get start time
-            const dateTimeStr = `${event.date} ${timeStr}`;
-            eventDateTime = new Date(dateTimeStr);
-          } else {
-            // "March 15, 2024" format
-            const timeStr = event.time.split(' - ')[0];
-            const dateTimeStr = `${event.date} ${timeStr}`;
-            eventDateTime = new Date(dateTimeStr);
-          }
-          
-          // Convert to user's timezone
-          const eventInUserTz = toZonedTime(eventDateTime, userTimezone);
-          const isUpcoming = isAfter(eventInUserTz, now);
+          const eventDateTime = parseEventDateTime(event);
+          const isUpcoming = isAfter(eventDateTime, now);
           
           console.log(`📅 Event: ${event.title}`);
-          console.log(`   Date/Time: ${formatInTimeZone(eventInUserTz, userTimezone, 'yyyy-MM-dd HH:mm:ss zzz')}`);
+          console.log(`   Parsed DateTime: ${eventDateTime.toISOString()}`);
           console.log(`   Is upcoming: ${isUpcoming}`);
           
           return isUpcoming;
         } catch (error) {
-          console.error(`Error parsing event date/time for ${event.title}:`, error);
+          console.error(`Error filtering event ${event.title}:`, error);
           return true; // Keep event if parsing fails
         }
       })
       .sort((a, b) => {
-        const dateA = new Date(a.date.includes('-') ? `${a.date} ${a.time.split(' - ')[0]}` : `${a.date} ${a.time.split(' - ')[0]}`);
-        const dateB = new Date(b.date.includes('-') ? `${b.date} ${b.time.split(' - ')[0]}` : `${b.date} ${b.time.split(' - ')[0]}`);
-        return dateA.getTime() - dateB.getTime();
+        try {
+          const dateA = parseEventDateTime(a);
+          const dateB = parseEventDateTime(b);
+          return dateA.getTime() - dateB.getTime();
+        } catch (error) {
+          console.error('Error sorting events:', error);
+          return 0;
+        }
       })
       .slice(0, 6); // Show max 6 upcoming events
   };
@@ -197,37 +245,27 @@ const UpcomingEvents = () => {
   console.log("🎯 Filtered upcoming events:", eventList);
 
   const generateGoogleCalendarLink = (event: any) => {
-    // Handle different date formats
-    let eventDate;
-    if (event.date.includes('-')) {
-      // ISO format (YYYY-MM-DD)
-      eventDate = event.date;
-    } else {
-      // Convert "March 15, 2024" format to ISO
-      eventDate = new Date(event.date).toISOString().split('T')[0];
+    try {
+      const eventDateTime = parseEventDateTime(event);
+      const endDateTime = new Date(eventDateTime.getTime() + (60 * 60 * 1000)); // Default 1 hour duration
+      
+      const formatDate = (date: Date) => {
+        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      };
+      
+      const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: event.title,
+        dates: `${formatDate(eventDateTime)}/${formatDate(endDateTime)}`,
+        details: event.description,
+        location: event.location,
+      });
+      
+      return `https://calendar.google.com/calendar/render?${params.toString()}`;
+    } catch (error) {
+      console.error('Error generating calendar link:', error);
+      return 'https://calendar.google.com';
     }
-    
-    const startDate = new Date(eventDate + ' ' + event.time.split(' - ')[0]);
-    const endDate = new Date(eventDate + ' ' + (event.time.split(' - ')[1] || event.time.split(' - ')[0]));
-    
-    // If end time parsing fails, default to 1 hour after start
-    if (isNaN(endDate.getTime())) {
-      endDate.setTime(startDate.getTime() + (60 * 60 * 1000));
-    }
-    
-    const formatDate = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    };
-    
-    const params = new URLSearchParams({
-      action: 'TEMPLATE',
-      text: event.title,
-      dates: `${formatDate(startDate)}/${formatDate(endDate)}`,
-      details: event.description,
-      location: event.location,
-    });
-    
-    return `https://calendar.google.com/calendar/render?${params.toString()}`;
   };
 
   const getTypeColor = (type: string, urgent: boolean) => {
@@ -238,6 +276,22 @@ const UpcomingEvents = () => {
       case "Speaker Event": return "bg-accent text-accent-foreground";
       case "Social": return "bg-muted text-muted-foreground";
       default: return "bg-muted text-muted-foreground";
+    }
+  };
+
+  // Safe date formatting function
+  const formatEventDate = (event: any) => {
+    try {
+      const eventDateTime = parseEventDateTime(event);
+      return eventDateTime.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Date TBD';
     }
   };
 
@@ -287,15 +341,7 @@ const UpcomingEvents = () => {
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center text-muted-foreground">
                     <Calendar className="w-4 h-4 mr-2" />
-                    <span>{event.date.includes('-') ? 
-                      formatInTimeZone(new Date(event.date), Intl.DateTimeFormat().resolvedOptions().timeZone, 'EEEE, MMMM d, yyyy') :
-                      new Date(event.date).toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })
-                    }</span>
+                    <span>{formatEventDate(event)}</span>
                   </div>
                   <div className="flex items-center text-muted-foreground">
                     <Clock className="w-4 h-4 mr-2" />
