@@ -213,7 +213,6 @@ const Resources = () => {
               <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-1">How to Access Resources</h4>
               <p className="text-sm text-blue-700 dark:text-blue-300">
                 Click the <ExternalLink className="w-4 h-4 inline mx-1" /> button to view files in Google Drive, where you can download them directly. 
-                The <Download className="w-4 h-4 inline mx-1" /> button attempts direct download, but may require you to be signed into Google.
               </p>
             </div>
           </div>
