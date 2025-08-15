@@ -4,7 +4,7 @@ class DECAConfig {
   private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   // Initial URL - this will be updated from the Google Apps Script itself
-  private static readonly INITIAL_URL = 'https://script.google.com/macros/s/AKfycby0LGwZFHlTM0eC1nNnD6WRCoP-HCMJ8KDavLBdPuMEsrbwow7YOZ73l4ApPPJqTx8J-A/exec';
+  private static readonly INITIAL_URL = 'https://script.google.com/macros/s/AKfycby4SzmNdce3IjpstYSysQceN_zCln54zx0LegY8ygn1mPvB1HCatZc_eTn4RKm3HlJFFw/exec';
 
   // Fetch configuration from Google Apps Script
   static async fetchRemoteConfig(): Promise<any> {
