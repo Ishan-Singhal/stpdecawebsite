@@ -2,7 +2,21 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Play, ExternalLink, RefreshCw, Eye, FileIcon, Target } from "lucide-react";
+import { 
+  FileText, 
+  Play, 
+  ExternalLink, 
+  RefreshCw, 
+  Eye, 
+  FileIcon, 
+  Target, 
+  Download,
+  Presentation,
+  Sheet,
+  Image,
+  FileType,
+  Globe
+} from "lucide-react";
 import DECAConfig from "@/lib/DECAConfig";
 
 const QUICK_LINKS = [
@@ -69,15 +83,51 @@ const Resources = () => {
     }
   };
 
-  const getIcon = (type) => {
+  const getIcon = (type: string) => {
     switch (type) {
-      case "PDF": return <FileText className="w-5 h-5 text-red-500" />;
-      case "Video": return <Play className="w-5 h-5 text-purple-500" />;
-      default: return <FileIcon className="w-5 h-5 text-gray-500" />;
+      case "PDF": 
+        return <FileText className="w-5 h-5 text-red-500" />;
+      case "Video": 
+        return <Play className="w-5 h-5 text-purple-500" />;
+      case "Document": 
+        return <FileText className="w-5 h-5 text-blue-500" />;
+      case "Presentation": 
+        return <Presentation className="w-5 h-5 text-orange-500" />;
+      case "Spreadsheet": 
+        return <Sheet className="w-5 h-5 text-green-500" />;
+      case "Image": 
+        return <Image className="w-5 h-5 text-pink-500" />;
+      case "Form": 
+        return <FileType className="w-5 h-5 text-indigo-500" />;
+      case "Website": 
+        return <Globe className="w-5 h-5 text-cyan-500" />;
+      case "Text": 
+        return <FileText className="w-5 h-5 text-gray-500" />;
+      default: 
+        return <FileIcon className="w-5 h-5 text-gray-500" />;
     }
   };
 
-  const handlePreview = async (resource) => {
+  const getFileTypeLabel = (type: string, originalMimeType?: string) => {
+    // Show conversion info for Google Workspace files
+    if (originalMimeType) {
+      switch (originalMimeType) {
+        case 'application/vnd.google-apps.document':
+          return 'Google Doc (PDF)';
+        case 'application/vnd.google-apps.spreadsheet':
+          return 'Google Sheet (Excel)';
+        case 'application/vnd.google-apps.presentation':
+          return 'Google Slides (PDF)';
+        case 'application/vnd.google-apps.drawing':
+          return 'Google Drawing (PDF)';
+        default:
+          return type;
+      }
+    }
+    return type;
+  };
+
+  const handleDownload = async (resource: any) => {
     if (resource.url === '#') {
       toast({
         title: "Resource Not Available",
@@ -86,25 +136,79 @@ const Resources = () => {
       });
       return;
     }
+
     try {
+      // For forms and websites, open in new tab instead of downloading
+      if (resource.type === 'Form' || resource.type === 'Website') {
+        window.open(resource.url, '_blank');
+        toast({
+          title: "Opening Resource",
+          description: `Opening ${resource.name} in new tab...`,
+        });
+        return;
+      }
+
+      // For downloadable files, trigger download
+      const link = document.createElement('a');
+      link.href = resource.url;
+      link.download = resource.name;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Download Started",
+        description: `Downloading ${resource.name}...`,
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Unable to download this resource. Opening in new tab instead...",
+        variant: "destructive",
+      });
+      // Fallback to opening in new tab
+      window.open(resource.url, '_blank');
+    }
+  };
+
+  const handlePreview = async (resource: any) => {
+    if (resource.url === '#') {
+      toast({
+        title: "Resource Not Available",
+        description: "This resource is coming soon!",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // For Google Drive files, create preview URL
       let previewUrl = resource.url;
-      if (resource.url.includes('drive.google.com')) {
-        const fileId = resource.url.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1];
-        if (fileId) {
-          previewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+      
+      if (resource.fileId) {
+        // Use Google Drive preview for supported file types
+        if (resource.type === 'PDF' || resource.type === 'Document' || resource.type === 'Presentation' || resource.type === 'Spreadsheet') {
+          previewUrl = `https://drive.google.com/file/d/${resource.fileId}/preview`;
+        } else if (resource.type === 'Image') {
+          previewUrl = `https://drive.google.com/uc?id=${resource.fileId}`;
         }
       }
+      
       window.open(previewUrl, '_blank');
       toast({
         title: "Opening Preview",
-        description: `Opening ${resource.name} in new tab...`,
+        description: `Opening ${resource.name} preview...`,
       });
     } catch (error) {
+      console.error('Preview error:', error);
       toast({
-        title: "Error",
-        description: "Unable to preview this resource.",
+        title: "Preview Failed",
+        description: "Unable to preview this resource. Trying download instead...",
         variant: "destructive",
       });
+      handleDownload(resource);
     }
   };
 
@@ -173,30 +277,89 @@ const Resources = () => {
                           {getIcon(resource.type)}
                         </div>
                         <div className="flex-1">
-                          <div className="text-sm font-semibold text-foreground group-hover/resource:text-primary transition-colors duration-200">{resource.name}</div>
+                          <div className="text-sm font-semibold text-foreground group-hover/resource:text-primary transition-colors duration-200">
+                            {resource.name}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {getFileTypeLabel(resource.type, resource.originalMimeType)}
+                          </div>
                           {resource.description && (
-                            <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{resource.description}</div>
+                            <div className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                              {resource.description}
+                            </div>
                           )}
                         </div>
                       </div>
                       <div className="flex gap-2 opacity-0 group-hover/resource:opacity-100 transition-opacity duration-200">
+                        {/* Preview button for supported file types */}
+                        {(resource.type === 'PDF' || resource.type === 'Document' || resource.type === 'Presentation' || resource.type === 'Spreadsheet' || resource.type === 'Image') && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            disabled={resource.url === '#'}
+                            onClick={() => handlePreview(resource)}
+                            className="hover:bg-primary/10 hover:text-primary"
+                            title="Preview"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        )}
+                        
+                        {/* Download/Open button */}
                         <Button 
                           variant="ghost" 
                           size="sm" 
                           disabled={resource.url === '#'}
-                          onClick={() => handlePreview(resource)}
+                          onClick={() => handleDownload(resource)}
                           className="hover:bg-primary/10 hover:text-primary"
+                          title={resource.type === 'Form' || resource.type === 'Website' ? 'Open' : 'Download'}
                         >
-                          <Eye className="w-4 h-4" />
+                          {resource.type === 'Form' || resource.type === 'Website' ? (
+                            <ExternalLink className="w-4 h-4" />
+                          ) : (
+                            <Download className="w-4 h-4" />
+                          )}
                         </Button>
                       </div>
                     </div>
                   ))}
+                  
+                  {/* Show message if no resources in category */}
+                  {(!category.resources || category.resources.length === 0) && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <FileIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No resources available in this category yet.</p>
+                      <p className="text-sm">Check back later for updates!</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
+
+        {/* Resource Summary */}
+        {resources && resources.categories && (
+          <div className="mb-8 p-4 bg-background/50 rounded-lg border">
+            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+              <span>
+                Total Resources: {allResources.length}
+              </span>
+              <span>•</span>
+              <span>
+                Documents: {allResources.filter(r => ['PDF', 'Document', 'Presentation', 'Spreadsheet'].includes(r.type)).length}
+              </span>
+              <span>•</span>
+              <span>
+                Videos: {allResources.filter(r => r.type === 'Video').length}
+              </span>
+              <span>•</span>
+              <span>
+                Other: {allResources.filter(r => !['PDF', 'Document', 'Presentation', 'Spreadsheet', 'Video'].includes(r.type)).length}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Quick Links */}
         <div className="bg-background/80 backdrop-blur-sm rounded-xl p-8 border">
@@ -220,6 +383,14 @@ const Resources = () => {
             ))}
           </div>
         </div>
+
+        {/* Loading State */}
+        {!resources && (
+          <div className="text-center py-12">
+            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">Loading resources...</p>
+          </div>
+        )}
       </div>
     </section>
   );
