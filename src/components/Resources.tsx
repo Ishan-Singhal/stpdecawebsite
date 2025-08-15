@@ -148,27 +148,54 @@ const Resources = () => {
         return;
       }
 
-      // For downloadable files, trigger download
-      const link = document.createElement('a');
-      link.href = resource.url;
-      link.download = resource.name;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Try direct download first if available
+      let downloadUrl = resource.urls?.download || resource.url;
       
-      toast({
-        title: "Download Started",
-        description: `Downloading ${resource.name}...`,
-      });
+      if (resource.urls?.download) {
+        try {
+          // Create a hidden iframe to attempt the download
+          const iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.src = downloadUrl;
+          document.body.appendChild(iframe);
+          
+          // Remove iframe after a short delay
+          setTimeout(() => {
+            if (document.body.contains(iframe)) {
+              document.body.removeChild(iframe);
+            }
+          }, 2000);
+          
+          toast({
+            title: "Download Started",
+            description: `Downloading ${resource.name}... If download doesn't start, try "View Online"`,
+          });
+          
+        } catch (error) {
+          console.log('Direct download failed, opening view link');
+          window.open(resource.urls?.view || resource.url, '_blank');
+          toast({
+            title: "Opening File",
+            description: "Download not available. Opening file for manual download...",
+          });
+        }
+      } else {
+        // No direct download available, open view link
+        window.open(resource.url, '_blank');
+        toast({
+          title: "Opening File",
+          description: "Opening file in Google Drive. You can download from there.",
+        });
+      }
+      
     } catch (error) {
       console.error('Download error:', error);
       toast({
-        title: "Download Failed",
-        description: "Unable to download this resource. Opening in new tab instead...",
+        title: "Opening File",
+        description: "Opening resource in new tab...",
         variant: "destructive",
       });
-      // Fallback to opening in new tab
+      // Final fallback to opening the main URL
       window.open(resource.url, '_blank');
     }
   };
@@ -184,17 +211,8 @@ const Resources = () => {
     }
 
     try {
-      // For Google Drive files, create preview URL
-      let previewUrl = resource.url;
-      
-      if (resource.fileId) {
-        // Use Google Drive preview for supported file types
-        if (resource.type === 'PDF' || resource.type === 'Document' || resource.type === 'Presentation' || resource.type === 'Spreadsheet') {
-          previewUrl = `https://drive.google.com/file/d/${resource.fileId}/preview`;
-        } else if (resource.type === 'Image') {
-          previewUrl = `https://drive.google.com/uc?id=${resource.fileId}`;
-        }
-      }
+      // Use preview URL if available, otherwise use view URL
+      let previewUrl = resource.urls?.preview || resource.urls?.view || resource.url;
       
       window.open(previewUrl, '_blank');
       toast({
@@ -205,10 +223,9 @@ const Resources = () => {
       console.error('Preview error:', error);
       toast({
         title: "Preview Failed",
-        description: "Unable to preview this resource. Trying download instead...",
+        description: "Unable to preview this resource.",
         variant: "destructive",
       });
-      handleDownload(resource);
     }
   };
 
@@ -240,6 +257,20 @@ const Resources = () => {
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Everything you need to succeed in DECA competitions and develop your business skills
           </p>
+        </div>
+
+        {/* User guidance message */}
+        <div className="mb-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="flex items-start gap-3">
+            <ExternalLink className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-1">How to Access Resources</h4>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Click the <ExternalLink className="w-4 h-4 inline mx-1" /> button to view files in Google Drive, where you can download them directly. 
+                The <Download className="w-4 h-4 inline mx-1" /> button attempts direct download, but may require you to be signed into Google.
+              </p>
+            </div>
+          </div>
         </div>
 
         {isAdmin && (
@@ -290,7 +321,7 @@ const Resources = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex gap-2 opacity-0 group-hover/resource:opacity-100 transition-opacity duration-200">
+                      <div className="flex gap-1 opacity-0 group-hover/resource:opacity-100 transition-opacity duration-200">
                         {/* Preview button for supported file types */}
                         {(resource.type === 'PDF' || resource.type === 'Document' || resource.type === 'Presentation' || resource.type === 'Spreadsheet' || resource.type === 'Image') && (
                           <Button 
@@ -301,25 +332,35 @@ const Resources = () => {
                             className="hover:bg-primary/10 hover:text-primary"
                             title="Preview"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-3 h-3" />
                           </Button>
                         )}
                         
-                        {/* Download/Open button */}
+                        {/* View Online button */}
                         <Button 
                           variant="ghost" 
                           size="sm" 
                           disabled={resource.url === '#'}
-                          onClick={() => handleDownload(resource)}
+                          onClick={() => window.open(resource.urls?.view || resource.url, '_blank')}
                           className="hover:bg-primary/10 hover:text-primary"
-                          title={resource.type === 'Form' || resource.type === 'Website' ? 'Open' : 'Download'}
+                          title="View in Google Drive"
                         >
-                          {resource.type === 'Form' || resource.type === 'Website' ? (
-                            <ExternalLink className="w-4 h-4" />
-                          ) : (
-                            <Download className="w-4 h-4" />
-                          )}
+                          <ExternalLink className="w-3 h-3" />
                         </Button>
+                        
+                        {/* Download button (only show if download URL exists) */}
+                        {resource.urls?.download && resource.type !== 'Form' && resource.type !== 'Website' && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            disabled={resource.url === '#'}
+                            onClick={() => handleDownload(resource)}
+                            className="hover:bg-primary/10 hover:text-primary"
+                            title="Try Download"
+                          >
+                            <Download className="w-3 h-3" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}
