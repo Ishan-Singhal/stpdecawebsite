@@ -32,16 +32,6 @@ const Hero = () => {
 
 
 
-{/* Remind Instructions */}
-<div className="bg-background/10 backdrop-blur-sm rounded-xl p-6 border border-primary-foreground/20 mb-4">
-  <h3 className="text-lg font-semibold text-primary-foreground mb-2">
-    Stay Connected with Remind
-  </h3>
-  <p className="text-primary-foreground/90">
-    Text <span className="font-bold text-secondary">@stpdeca26</span> to <span className="font-bold text-secondary">81010</span> for important updates and announcements.
-  </p>
-</div>
-
 {/* Join Us Form */}
 <div className="bg-background/10 backdrop-blur-sm rounded-xl p-6 border border-primary-foreground/20">
   <h3 className="text-lg font-semibold text-primary-foreground mb-2">
