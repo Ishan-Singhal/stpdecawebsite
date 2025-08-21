@@ -21,28 +21,39 @@ const JoinUs = () => {
     }
   ];
 
-  const steps = [
-    {
-      number: "1",
-      title: "Join Our Remind",
-      description: "Text @stpdeca26 to 81010 to stay updated on all announcements and meetings"
-    },
-    {
-      number: "2",
-      title: "Attend a Meeting",
-      description: "Come to our next chapter meeting to learn more and meet current members"
-    },
-    {
-      number: "3",
-      title: "Complete Membership",
-      description: "Fill out membership forms and pay dues to become an official member"
-    },
-    {
-      number: "4",
-      title: "Start Competing",
-      description: "Choose your competition events and begin preparation with our team"
-    }
-  ];
+const steps = [
+  {
+    number: "1",
+    title: "Join Our Remind",
+    description: "Text @stpdeca26 to 81010 to stay updated on all announcements and meetings"
+  },
+  {
+    number: "2",
+    title: "Fill Out the Membership Form",
+    description: (
+      <>
+        <a 
+          href="https://forms.gle/X63yrGVmeVeqGwYY9" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-primary underline font-bold"
+        >
+          Click here
+        </a> to complete the membership form online
+      </>
+    )
+  },
+  {
+    number: "3",
+    title: "Attend a Meeting",
+    description: "Come to our next chapter meeting to learn more and meet current members"
+  },
+  {
+    number: "4",
+    title: "Start Competing",
+    description: "Choose your competition events and begin preparation with our team"
+  }
+];
 
   return (
     <section id="join" className="py-20 bg-background">

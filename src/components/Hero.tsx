@@ -31,23 +31,40 @@ const Hero = () => {
           </p>
 
 
-          {/* Remind Instructions */}
-          <div className="bg-background/10 backdrop-blur-sm rounded-xl p-6 border border-primary-foreground/20">
-            <h3 className="text-lg font-semibold text-primary-foreground mb-2">
-              Stay Connected with Remind
-            </h3>
-            <p className="text-primary-foreground/90">
-              Text <span className="font-bold text-secondary">@stpdeca26</span> to{" "}
-              <span className="font-bold text-secondary">81010</span> for important updates and announcements
-            </p>
+
+{/* Remind Instructions */}
+<div className="bg-background/10 backdrop-blur-sm rounded-xl p-6 border border-primary-foreground/20 mb-4">
+  <h3 className="text-lg font-semibold text-primary-foreground mb-2">
+    Stay Connected with Remind
+  </h3>
+  <p className="text-primary-foreground/90">
+    Text <span className="font-bold text-secondary">@stpdeca26</span> to <span className="font-bold text-secondary">81010</span> for important updates and announcements.
+  </p>
+</div>
+
+{/* Join Us Form */}
+<div className="bg-background/10 backdrop-blur-sm rounded-xl p-6 border border-primary-foreground/20">
+  <h3 className="text-lg font-semibold text-primary-foreground mb-2">
+    Join Us Now!
+  </h3>
+  <p className="text-primary-foreground/90">
+    <a 
+      href="https://forms.gle/X63yrGVmeVeqGwYY9" 
+      target="_blank" 
+      rel="noopener noreferrer" 
+      className="font-bold text-secondary underline"
+    >
+      Click here to fill out the form
+    </a> to join us and stay updated!
+  </p>
+</div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-primary-foreground/50 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-primary-foreground/50 rounded-full mt-2 animate-pulse"></div>
           </div>
         </div>
-      </div>
-
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-primary-foreground/50 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-primary-foreground/50 rounded-full mt-2 animate-pulse"></div>
         </div>
       </div>
     </section>
