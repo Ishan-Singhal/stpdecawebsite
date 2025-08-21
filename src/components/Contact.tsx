@@ -15,7 +15,7 @@ const Contact = () => {
       name: "Anthony Ripley", // Change this to your assistant advisor's name
       title: "Assistant DECA Advisor",
       email: "anthony_ripley@roundrockisd.org", // Change this to the real email
-      phone: "512-428-7232", // Change this to the real phone number
+      phone: "512-428-7137", // Change this to the real phone number
       office: "Room D106", // Change this to the actual room number
     }
   ];

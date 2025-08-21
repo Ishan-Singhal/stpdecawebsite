@@ -8,49 +8,7 @@ import { isAfter, parseISO, format } from "date-fns";
 import DECAConfig from "@/lib/DECAConfig";
 
 const UpcomingEvents = () => {
-  // Use dynamic events if available, otherwise use defaults
-  const defaultEvents = [
-    {
-      title: "Regional Competition Prep Workshop",
-      date: "2024-12-15",
-      time: "3:30 PM - 5:00 PM",
-      location: "Room 205",
-      description: "Intensive preparation session for upcoming regional competitions. Practice rounds and feedback sessions included.",
-      type: "Workshop",
-      urgent: false,
-      calendarLink: "#"
-    },
-    {
-      title: "Business Plan Competition",
-      date: "2024-12-22",
-      time: "All Day",
-      location: "Austin Convention Center",
-      description: "State-level business plan competition. Transportation provided for qualified participants.",
-      type: "Competition",
-      urgent: true,
-      calendarLink: "#"
-    },
-    {
-      title: "Industry Guest Speaker: Marketing Trends",
-      date: "2024-12-28",
-      time: "4:00 PM - 5:30 PM",
-      location: "Auditorium",
-      description: "Local marketing executive will share insights on current industry trends and career paths.",
-      type: "Speaker Event",
-      urgent: false,
-      calendarLink: "#"
-    },
-    {
-      title: "DECA Social & Team Building",
-      date: "2025-01-05",
-      time: "6:00 PM - 8:00 PM",
-      location: "School Cafeteria",
-      description: "End-of-semester social event with games, food, and team building activities. All members welcome!",
-      type: "Social",
-      urgent: false,
-      calendarLink: "#"
-    }
-  ];
+  const defaultEvents = [];
 
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
