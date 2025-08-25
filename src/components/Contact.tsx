@@ -30,7 +30,7 @@ const Contact = () => {
     {
       icon: <Mail className="w-6 h-6" />,
       title: "Email", 
-      description: "stonypoint.deca@example.com",
+      description: "stp_deca@roundrockisd.org",
       primary: false
     }
   ];
