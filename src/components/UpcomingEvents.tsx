@@ -261,7 +261,7 @@ const UpcomingEvents = () => {
             Upcoming Events
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Stay updated with our latest competitions, workshops, and social events
+            Stay updated with our latest competitions, workshops, and social events with STP DECA!
           </p>
         </div>
 
