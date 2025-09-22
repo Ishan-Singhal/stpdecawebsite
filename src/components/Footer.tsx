@@ -43,7 +43,7 @@ const Footer = () => {
                 <span className="font-semibold">Join Our Remind</span>
               </div>
               <p className="text-sm">
-                Text <span className="font-bold text-secondary">@stpdeca25</span> to <span className="font-bold text-secondary">81010</span>
+                Text <span className="font-bold text-secondary">@stpdeca26</span> to <span className="font-bold text-secondary">81010</span>
               </p>
             </div>
           </div>

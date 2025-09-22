@@ -44,7 +44,7 @@ const WhyJoinDeca = () => {
             Why Join DECA?
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Discover the incredible opportunities that await you as a member of Stony Point DECA
+            Discover the incredible opportunities that await you as a member of STP DECA
           </p>
         </div>
 
