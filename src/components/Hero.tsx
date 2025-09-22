@@ -39,7 +39,7 @@ const Hero = () => {
   </h3>
   <p className="text-primary-foreground/90">
     <a 
-      href="https://forms.gle/X63yrGVmeVeqGwYY9" 
+      href="https://docs.google.com/forms/d/e/1FAIpQLSeSZ55D4TP8EsaM4op4aJ8A_KfDYe11zrHk44at35i4efr55w/viewform" 
       target="_blank" 
       rel="noopener noreferrer" 
       className="font-bold text-secondary underline"
