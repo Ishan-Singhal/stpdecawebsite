@@ -86,16 +86,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Meeting Info */}
-        <div className="border-t border-primary-foreground/20 mt-12 pt-8">
-          <div className="bg-primary-foreground/10 rounded-lg p-6 text-center">
-            <h4 className="font-semibold text-lg mb-2">Chapter Meetings</h4>
-            <p className="text-primary-foreground/90">
-              Every Tuesday at 4:30 PM in Room D106 • New members welcome!
-            </p>
-          </div>
-        </div>
-
         {/* Copyright */}
         <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center text-primary-foreground/80">
           <p>&copy; 2024 Stony Point DECA. All rights reserved.</p>
