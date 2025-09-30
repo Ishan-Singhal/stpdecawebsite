@@ -63,7 +63,7 @@ const steps = [
         </div>
 
         {/* Member Benefits */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {benefits.map((benefit, index) => (
             <Card key={index} className="text-center group hover:shadow-lg transition-all duration-300">
               <CardHeader className="pb-4">
