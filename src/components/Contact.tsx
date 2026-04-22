@@ -112,10 +112,6 @@ const Contact = () => {
 
         {/* Meeting Information */}
         <div className="mt-16 bg-background/80 backdrop-blur-sm rounded-xl p-8 border text-center">
-          <h3 className="text-2xl font-bold mb-4">Chapter Meetings</h3>
-          <p className="text-lg text-muted-foreground mb-6">
-            Join us every <strong>Tuesday at 4:30 PM</strong> in <strong>Room D106</strong>
-          </p>
           <p className="text-muted-foreground">
             New members are always welcome! No prior business experience required.
           </p>

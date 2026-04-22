@@ -10,11 +10,6 @@ const JoinUs = () => {
       description: "Access to competitions, workshops, networking events, and scholarship opportunities"
     },
     {
-      icon: <Users className="w-6 h-6" />,
-      title: "Mentorship Program",
-      description: "Get paired with experienced members and business professionals for guidance"
-    },
-    {
       icon: <Calendar className="w-6 h-6" />,
       title: "Regular Events",
       description: "Monthly meetings, competition prep sessions, and fun social activities"
@@ -68,7 +63,7 @@ const steps = [
         </div>
 
         {/* Member Benefits */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {benefits.map((benefit, index) => (
             <Card key={index} className="text-center group hover:shadow-lg transition-all duration-300">
               <CardHeader className="pb-4">
@@ -125,7 +120,7 @@ const steps = [
           </div>
           <div className="mt-6 p-4 bg-background/10 rounded-lg">
             <p className="text-sm">
-              Text <span className="font-bold">@stpdeca25</span> to <span className="font-bold">81010</span>
+              Text <span className="font-bold">@stpdeca26</span> to <span className="font-bold">81010</span>
             </p>
           </div>
         </div>
