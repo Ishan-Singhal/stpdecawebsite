@@ -13,6 +13,8 @@ jobs:
         with:
           fetch-depth: 0
       - name: Push to stp-deca fork
+        env:
+          TOKEN: ${{ secrets.DECA_SYNC_TOKEN }}
         run: |
-          git remote add deca https://x-access-token:${{ secrets.DECA_SYNC_TOKEN }}@github.com/stp-deca/stpdecawebsite.git
+          git remote add deca https://stp-deca:${TOKEN}@github.com/stp-deca/stpdecawebsite.git
           git push deca main --force
