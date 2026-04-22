@@ -1,0 +1,18 @@
+name: Sync to DECA fork
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Push to stp-deca fork
+        run: |
+          git remote add deca https://x-access-token:${{ secrets.DECA_SYNC_TOKEN }}@github.com/stp-deca/stpdecawebsite.git
+          git push deca main --force
